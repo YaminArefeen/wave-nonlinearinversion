@@ -1,4 +1,4 @@
-function [psf,gradient] = wavepsf(adc,Tadc,gamma,Gymax,yind)
+function [psf,gradient] = wavepsf(adc,Tadc,gamma,Gymax,yind,cycles)
 %In this function, we generate a wave point spread function and gradient given the relevant wave parameters
 %
 %Inputs:
@@ -7,6 +7,7 @@ function [psf,gradient] = wavepsf(adc,Tadc,gamma,Gymax,yind)
 %gamma         - Larmor Frequency at Hz/T
 %Gymax         - Maximum gradient amplitude T/m
 %yind (M x1)   - Physical y location of phase encode points 
+%cycles        - Number of gradient cycles
 
 %Outputs:
 %psf (Nro x M)      - Wave point spread function
@@ -15,7 +16,7 @@ function [psf,gradient] = wavepsf(adc,Tadc,gamma,Gymax,yind)
 nx = length(adc);
 ny = length(yind);
 
-gradient = sin(2*pi*adc ./ Tadc);                  % integral of cosine wave gradient -> sine
+gradient = sin(cycles*pi*adc ./ Tadc);                  % integral of cosine wave gradient -> sine
 
 psf = zeros(nx,ny);
 for y = 1:ny

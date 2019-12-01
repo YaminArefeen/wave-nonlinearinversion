@@ -18,16 +18,17 @@ fprintf('Defining Constants and flags... ')
 R           = 4;                %Undersampling factor for the simulation experiment
 acss        = 24;               %Callibration size
 stdn        = 5e-3;             %Noise Level
-os          = 2;                %Oversampling in readout direction
+os          = 6;                %Oversampling in readout direction
 
 Nro         = M*os;             %Number of readout points defined by level of oversampling in the readout direction
 acs         = (M/2-(acss/2 - 1)):(M/2+acss/2); %Acs region
 
 %-Wave Parameters
 wvflag  = 1;              %       Flag indicating whether we want to use Wave or not
+cycles  = 8;              %       Number of gradient cycles
 FOVy    = 300* 1e-3;      % (m)   Simulated FOV in the y direction used to characterize wave in y direction
 Tadc    = 1432.7* 1e-6;   % (sec) Simulated acquisition time to characterize wave in y direction
-Gymax   = 20  * 1e-3;     % (T/m) Maximum wave gradient to chracterize wave in y direction
+Gymax   = 16* 1e-3;     % (T/m) Maximum wave gradient to chracterize wave in y direction
 gamma   = 42.57747892 * 1e6;% (Hz/T) Larmor frequency to characterize wave gradient 
 yind    = linspace(-FOVy/2,FOVy/2,N) ; % (m) Location of simulated y samples
 adc     = linspace(0,Tadc,Nro);        % (sec) Simulated ADC times
@@ -56,7 +57,7 @@ fprintf('Generating wave psf, linear ops, and data... ')
 
 if(wvflag)
 %-Defining the wave pointspread function
-[psf,gradient] = wavepsf(adc,Tadc,gamma,Gymax,yind);
+[psf,gradient] = wavepsf(adc,Tadc,gamma,Gymax,yind,cycles);
 psf = repmat(psf,1,1,C);
 else
 psf = 1;
@@ -113,4 +114,9 @@ cest2= cest./cnorm;                                     %Scaling correction on c
 
 a = @(x) gather(abs(x) / max(abs(x(:))));
 out = [a(sense) a(pest) a(gt)];                         %Compare the reconstructions
-%save('~/out.mat','out')                                %Save the result 
+
+results.out = out;
+results.psf = gather(psf(:,:,1));
+results.cest= cest2;
+results.maps= gather(maps);
+save('~/out.mat','results')                                %Save the result 
