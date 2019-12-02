@@ -1,4 +1,4 @@
-function hist = regnewton(xo,p,y,ops)
+function hist = regnewton(xo,p,ops)
 %Performs a l2 regularized newton solve. Each linearized system is solved with the conjugate gradient algorithm and L2-regularization
 %Inputs:
     %xo     - Initial guess at a solution
@@ -17,11 +17,6 @@ xn      = xo;              %Set initial guess
 
 res     = zeros(it+1,1);            %Store the residuals at each iteration (and beginning)
 
-%Store everything onto the gpu if I have chosen that option
-if(strcmp(class(y),'gpuArray'))
-    res = gpuArray(res);
-end
-
 fprintf('Starting Newton Algorithm...\n')
 fprintf('Newton Iterations         : %d\n',it)
 fprintf('L2 on maps and parameters : %f\n',ao)
@@ -31,7 +26,10 @@ for n = 1:it    %Do the newton iterations
     fprintf('~~~~~~~~~Newton Iteration: %d~~~~~~~~~\n',n)
 %At each iteration, should be solving the l2-regularized linearized system:
 %       (DF(xn)^H * DF(xn) + I an) * dx = DF(xn)^H * (y - F(xn)) - an (xn - xo)
-
+    fprintf('Loading y... ')
+    y = readcfl('~/nonlinearwave/results/curiter/y'); %Reload y
+    fprintf('done\n')
+    
     an           = ao * q^(n-1);             %Regularization level at this iteration
 
     fprintf('Computing forward operator... ')
@@ -39,31 +37,26 @@ for n = 1:it    %Do the newton iterations
     fprintf('done\n')
     
     fprintf('Current Netwon Residual: ') 
-    %res(n)       = norm(y(:) - Fxn(:))/norm(y(:));
-    res = 1;
+    res(n)       = norm(y(:) - Fxn(:))/norm(y(:));
     fprintf('%.4f\n',res(n))
 
     tmp     = y - Fxn;
     clear Fxn
+
     fprintf('Computing right hand side for linear system... ')
     rhs     = ops.DFH(tmp,xn) - an * (xn - xo);        %Right hand side in the linearized system
     fprintf('done\n')
-    clear tmp 
-    fprintf('Saving data and clearing for memory... ')
-    writecfl('~/nonlinearwave/results/curiter/y',y)
-    fprintf('done\n')
-    clear y
+    clear tmp y
+
     A       = @(dx) reshape(ops.DFH(ops.DF(reshape(dx,dims),xn),xn),numel(xn),1) + an * dx;  
     fprintf('Solving linearized system with pcg...\n')
-    dx      = reshape(pcg(A,rhs(:),[],1),dims);              %Solve the system with Conjuage-gradients
+    dx      = reshape(pcg(A,rhs(:)),dims);              %Solve the system with Conjuage-gradients
 
     clear rhs %Clear for the sake of memory
 
     xn      = xn + dx;                                  %Perform the Newton Update
 
-    clear dx
-    
-    y = readcfl('~/nonlinearwave/results/curiter/y'); %Reload y
+    clear dx %Clear for the sake of memory
 end
 
 Fxn               = ops.F(xn);

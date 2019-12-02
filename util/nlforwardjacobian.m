@@ -25,6 +25,10 @@ function out = nlforwardjacobian(dx,xn,ops,W)
 %
 %NOTE: We apply the forward W operator on the coil sensitivity maps to transform them back to the appropriate image space before applying the forward operator
 
-out = ops.R(ops.Fy(ops.Wave(ops.Fx(ops.Rsz(bsxfun(@times,dx(:,:,1),W(xn(:,:,2:end),'-f')) + bsxfun(@times,xn(:,:,1),W(dx(:,:,2:end),'-f')))))));
-
+if(length(size(dx)) == 3) %2D problem
+    out = ops.R(ops.Fy(ops.Wave(ops.Fx(ops.Rsz(bsxfun(@times,dx(:,:,1),W(xn(:,:,2:end),'-f')) + bsxfun(@times,xn(:,:,1),W(dx(:,:,2:end),'-f')))))));
+elseif(length(size(dx)) == 4) %3D problem
+    out = ops.R(ops.Fy(ops.Wave(ops.Fx(ops.Rsz(bsxfun(@times,dx(:,:,:,1),W(xn(:,:,:,2:end),'-f')) + bsxfun(@times,xn(:,:,:,1),W(dx(:,:,:,2:end),'-f')))))));
 end
+
+end %End of function

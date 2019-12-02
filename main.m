@@ -21,7 +21,7 @@ stdn        = 5e-3;             %Noise Level
 os          = 6;                %Oversampling in readout direction
 
 Nro         = M*os;             %Number of readout points defined by level of oversampling in the readout direction
-acs         = (M/2-(acss/2 - 1)):(M/2+acss/2); %Acs region
+acs         = (N/2-(acss/2 - 1)):(N/2+acss/2); %Acs region
 
 %-Wave Parameters
 wvflag  = 1;              %       Flag indicating whether we want to use Wave or not
