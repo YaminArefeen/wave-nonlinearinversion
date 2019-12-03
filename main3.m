@@ -13,11 +13,11 @@ end
 
 fprintf('Defining constants and flags... ')
 %-Acceleration, acs size, and noise level parameters
-seflag  = 0;          %Whether we want to perform SENSE reconstruction before nonlinear inversion
-R       = [3,3];      %Undersampling factor in the phase encode and partition directions
+seflag  = 1;          %Whether we want to perform SENSE reconstruction before nonlinear inversion
+R       = [2,2];      %Undersampling factor in the phase encode and partition directions
 acss    = [24,24];    %Acs size in the phase encode and partition directions
 stdn    = 0;       %Noise level
-os      = 4;          %Wave oversampling 
+os      = 6;          %Wave oversampling 
 
 Nro     = M*os;
 acspe   = (N/2 - (acss/2 - 1)):(N/2 + acss/2); %Phase encode acs size
@@ -51,7 +51,7 @@ No = (1 + s * k) .^ (l/2);
 fprintf('done\n')
 
 fprintf('Generating wave psf, linear ops, and data... ')
-if(wvflag)
+if(wvflag)  
     [psf,gradient] = wavepsf3d(adc,Tadc,gamma,Gymax,Gzmax,yind,zind,cycles);
 else
     psf = 1;
@@ -85,7 +85,9 @@ if(seflag)
     fprintf('SENSE reconstruction...\n')
     kadj    = ops.A_adj(y);
     clear   y;  %for memory issues
-    sense   = reshape(pcg(ops.pcgA,kadj(:)),M,N,P);
+    sense   = reshape(pcg(ops.pcgA,kadj(:)),M,N,P); 
+    writecfl('results/sensewave/experiment1/res',sense)
+    return
 end
 
 fprintf('Defining nonlinear operators... ')

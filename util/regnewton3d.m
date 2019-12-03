@@ -27,7 +27,7 @@ for n = 1:it    %Do the newton iterations
 %At each iteration, should be solving the l2-regularized linearized system:
 %       (DF(xn)^H * DF(xn) + I an) * dx = DF(xn)^H * (y - F(xn)) - an (xn - xo)
     fprintf('Loading y... ')
-    y = readcfl('~/nonlinearwave/results/curiter/y'); %Reload y
+    y = readcfl('/home/yarefeen/research/wave-nonlinearinversion/results/curiter/y'); %Reload y
     fprintf('done\n')
     
     an           = ao * q^(n-1);             %Regularization level at this iteration
