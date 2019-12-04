@@ -16,7 +16,7 @@ fprintf('Defining constants and flags... ')
 seflag  = 0;          %Whether we want to perform SENSE reconstruction before nonlinear inversion
 R       = [2,2];      %Undersampling factor in the phase encode and partition directions
 acss    = [24,24];    %Acs size in the phase encode and partition directions
-stdn    = 0;       %Noise level
+stdn    = 0;          %Noise level
 os      = 6;          %Wave oversampling 
 
 Nro     = M*os;

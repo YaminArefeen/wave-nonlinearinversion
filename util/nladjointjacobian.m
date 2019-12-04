@@ -30,12 +30,15 @@ if(strcmp(class(dy),'gpuArray'))
     out = gpuArray(out);
 end
 
-tmp = ops.Rszadj(ops.Fxadj(ops.Wave_adj(ops.Fyadj(ops.R(dy)))));
 
 if(length(size(dy)) == 3) %2D problem
+    tmp = ops.Rszadj(ops.Fxadj(ops.Wave_adj(ops.Fyadj(ops.R(dy)))));
+
     out(:,:,1)     = squeeze(sum(bsxfun(@times,conj(W(xn(:,:,2:end),'-f')),tmp),3));
     out(:,:,2:end) = W(sum(bsxfun(@times,conj(xn(:,:,1)),tmp),4),'-h');
 elseif(length(size(dy)) == 4) %3D problem
+    tmp = ops.Rszadj(ops.Fxadj(ops.Wave_adj(ops.Fyadj(ops.Fzadj(ops.R(dy))))));
+
     out(:,:,:,1)     = sum(bsxfun(@times,conj(W(xn(:,:,:,2:end),'-f')),tmp),4);
     out(:,:,:,2:end) = W(bsxfun(@times,conj(xn(:,:,:,1)),tmp),'-h');
 end

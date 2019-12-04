@@ -21,7 +21,7 @@ function out = nlforwardoperator(x,ops,W)
 if(length(size(x)) == 3) %2D problem
     out = ops.R(ops.Fy(ops.Wave(ops.Fx(ops.Rsz(bsxfun(@times,x(:,:,1),W(x(:,:,2:end),'-f')))))));
 elseif(length(size(x)) == 4) %3D problem
-    out = ops.R(ops.Fy(ops.Wave(ops.Fx(ops.Rsz(bsxfun(@times,x(:,:,:,1),W(x(:,:,:,2:end),'-f')))))));
+    out = ops.R(ops.Fz(ops.Fy(ops.Wave(ops.Fx(ops.Rsz(bsxfun(@times,x(:,:,:,1),W(x(:,:,:,2:end),'-f'))))))));
 end
 
 end
