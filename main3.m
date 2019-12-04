@@ -13,7 +13,7 @@ end
 
 fprintf('Defining constants and flags... ')
 %-Acceleration, acs size, and noise level parameters
-seflag  = 1;          %Whether we want to perform SENSE reconstruction before nonlinear inversion
+seflag  = 0;          %Whether we want to perform SENSE reconstruction before nonlinear inversion
 R       = [2,2];      %Undersampling factor in the phase encode and partition directions
 acss    = [24,24];    %Acs size in the phase encode and partition directions
 stdn    = 0;       %Noise level
@@ -24,7 +24,7 @@ acspe   = (N/2 - (acss/2 - 1)):(N/2 + acss/2); %Phase encode acs size
 acspa   = (P/2 - (acss/2 - 1)):(P/2 + acss/2); %partition phase encode size
 
 %-Wave Parameters
-wvflag      = 1;
+wvflag      = 0;
 cycles      = 8;
 FOVy        = 160 * 1e-3;
 FOVz        = 160 * 1e-3;
@@ -80,13 +80,15 @@ y   = y / norm(y(:)) * 100;
 %NOT ADDING NOISE FOR NOISE SINCE I ASSUME IT EXISTS IN ACQUIRED DATA
 fprintf('done\n')
 
-%Perform a SENSE Reconstruction to compare to nonlinear inversion
+%Perform a SENSE Reconstruction to compare to nonlinear inversion 
 if(seflag)
     fprintf('SENSE reconstruction...\n')
     kadj    = ops.A_adj(y);
     clear   y;  %for memory issues
+    tic
     sense   = reshape(pcg(ops.pcgA,kadj(:)),M,N,P); 
-    writecfl('results/sensewave/experiment1/res',sense)
+    toc
+    writecfl('results/sensenowave/experiment1/res',sense)
     return
 end
 
@@ -97,24 +99,30 @@ nl.DF   = @(dx,xn)  nlforwardjacobian(dx,xn,ops,nl.W);
 nl.DFH  = @(dy,xn)  nladjointjacobian(dy,xn,ops,nl.W);
 fprintf('done\n')
 
+fprintf('Computing initial guess as zerofilled reconstruction... ')
 xo = zeros(M,N,P,C+1);
-xo(:,:,:,1) = 1;
+xo(:,:,:,1) = ops.A_adj(y);
+fprintf('done\n')
 
 fprintf('Writing data for memory... ')
 writecfl('results/curiter/y',y) 
 clear y %for the sake of memory management
 fprintf('done\n')
 
+tic
 hist = regnewton3d(xo,p,nl);
+toc
 
+fprintf('Saving estimated proton density and coil maps... ')
 cest = nl.W(hist.xest(:,:,:,2:end),'-f');
 cnorm= sqrt(sum(abs(cest).^2,4));
 
 pest = hist.xest(:,:,:,1) .* cnorm;
-cest2= cest./cnorm;
+cest2= bsxfun(@rdivide,cest,cnorm);
 clear cest hist cnorm
 
-writecfl('results/nlwave/experiment1/pest',pest)
+writecfl('results/nlnowave/experiment1/pest',pest)
 clear pest
-writecfl('results/nlwave/experiment1/cest',cest2)
+writecfl('results/nlnowave/experiment1/cest',cest2)
 clear cest2
+fprintf('done\n')

@@ -56,11 +56,12 @@ for n = 1:it    %Do the newton iterations
 
     xn      = xn + dx;                                  %Perform the Newton Update
 
+    pn = xn(:,:,:,1);
+    save('~/out.mat','pn') %for sake of tracking solution over iterations
+    clear pn
+
     clear dx %Clear for the sake of memory
 end
-
-Fxn               = ops.F(xn);
-res(n+1)          = norm(y(:) - Fxn(:))/norm(y(:));
 
 hist.xest   = xn;
 hist.res    = res;
