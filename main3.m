@@ -50,7 +50,7 @@ zz = repmat(reshape(linspace(-.5,.5,P),1,1,P),M,N,1);
 k  = xx.^2 + yy.^2 + zz.^2;
 No = (1 + s * k) .^ (l/2);
 fprintf('done\n')
-return
+
 fprintf('Generating wave psf, linear ops, and data... ')
 if(wvflag)  
     [psf,gradient] = wavepsf3d(adc,Tadc,gamma,Gymax,Gzmax,yind,zind,cycles);
