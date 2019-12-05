@@ -44,12 +44,13 @@ p.it    = 15;
 p.ao    = .01;
 p.q     = 2/3;
 
-xx = repmat(linspace(-.5,.5,M),N,1);
-yy = repmat(linspace(-.5,.5,N)',1,M);
-k  = abs(xx + 1i*yy).^2;
+xx = repmat(reshape(linspace(-.5,.5,M),M,1,1),1,N,P);
+yy = repmat(reshape(linspace(-.5,.5,N),1,N,1),M,1,P);
+zz = repmat(reshape(linspace(-.5,.5,P),1,1,P),M,N,1);
+k  = xx.^2 + yy.^2 + zz.^2;
 No = (1 + s * k) .^ (l/2);
 fprintf('done\n')
-
+return
 fprintf('Generating wave psf, linear ops, and data... ')
 if(wvflag)  
     [psf,gradient] = wavepsf3d(adc,Tadc,gamma,Gymax,Gzmax,yind,zind,cycles);
