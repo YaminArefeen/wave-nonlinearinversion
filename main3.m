@@ -1,4 +1,4 @@
-%%A first pass at a 3D implementation of nonlinear inversion with WAVE encoding
+ %A first pass at a 3D implementation of nonlinear inversion with WAVE encoding
 addpath('util')
 
 fprintf('Loading ground truth image and coil sensitivity maps... ')
@@ -16,7 +16,7 @@ fprintf('Defining constants and flags... ')
 seflag  = 0;          %Whether we want to perform SENSE reconstruction before nonlinear inversion
 R       = [2,2];      %Undersampling factor in the phase encode and partition directions
 acss    = [24,24];    %Acs size in the phase encode and partition directions
-stdn    = 0;          %Noise level
+stdn    = 2e-3;          %Noise level
 os      = 6;          %Wave oversampling 
 
 Nro     = M*os;
@@ -41,7 +41,7 @@ gpu     = 0;
 l       = 32;
 s       = 300;
 p.it    = 15;
-p.ao    = .01;
+p.ao    = .001;
 p.q     = 2/3;
 
 xx = repmat(reshape(linspace(-.5,.5,M),M,1,1),1,N,P);
@@ -78,7 +78,7 @@ ops = definewavesenseops3d(maps,mask,psf,os);
 %-Acquired data
 y   = ops.A_for(gt);
 y   = y / norm(y(:)) * 100;
-%NOT ADDING NOISE FOR NOISE SINCE I ASSUME IT EXISTS IN ACQUIRED DATA
+y   = addnoise(y,stdn,mask);
 fprintf('done\n')
 
 %Perform a SENSE Reconstruction to compare to nonlinear inversion 
@@ -89,7 +89,7 @@ if(seflag)
     tic
     sense   = reshape(pcg(ops.pcgA,kadj(:)),M,N,P); 
     toc
-    writecfl('results/sensenowave/experiment1/res',sense)
+    writecfl('results/sensewave/experiment2/res',sense)
     return
 end
 
@@ -122,8 +122,8 @@ pest = hist.xest(:,:,:,1) .* cnorm;
 cest2= bsxfun(@rdivide,cest,cnorm);
 clear cest hist cnorm
 
-writecfl('results/nlnowave/experiment1/pest',pest)
+writecfl('results/nlnowave/experiment2/pest',pest)
 clear pest
-writecfl('results/nlnowave/experiment1/cest',cest2)
+writecfl('results/nlnowave/experiment2/cest',cest2)
 clear cest2
 fprintf('done\n')
